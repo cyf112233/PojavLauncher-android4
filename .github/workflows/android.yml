@@ -32,7 +32,7 @@ jobs:
           workflow: android.yml
           path: app_pojavlauncher/src/main/jniLibs
           workflow_conclusion: success
-          repo: Google61/gl4es-114-extra
+          repo: cyf112233/gl4es-114-extra
           branch: master
           name: gl4es-114   # 如果该 artifact 包含所有架构，后续会清理非 arm64 的 so
 
@@ -47,15 +47,6 @@ jobs:
           workflow_conclusion: success
           branch: jre8-api19
           name: jre8-aarch64   # 改为 arm64 的 artifact
-
-    # 如果 gl4es artifact 包含多架构，只保留 arm64-v8a
-    - name: Keep only arm64 gl4es libraries
-      run: |
-        JNILIBS_DIR="app_pojavlauncher/src/main/jniLibs"
-        if [ -d "$JNILIBS_DIR" ]; then
-          # 删除所有非 arm64-v8a 的目录
-          find "$JNILIBS_DIR" -mindepth 1 -maxdepth 1 -type d ! -name "arm64-v8a" -exec rm -rf {} +
-        fi
 
     # 构建 JRE JAR 文件
     - name: Build JRE JAR files
@@ -88,22 +79,9 @@ jobs:
       run: |
         ./gradlew :app_pojavlauncher:assembleDebug -Pandroid.abiFilters=arm64-v8a
         mv app_pojavlauncher/build/outputs/apk/debug/app_pojavlauncher-debug.apk out/app-debug.apk
-
-    # 构建不带运行时的 APK（仅 arm64）
-    - name: Build APK without runtime (arm64 only)
-      run: | 
-        rm -r app_pojavlauncher/src/main/assets/components/jre
-        ./gradlew assembleDebug -Pandroid.abiFilters=arm64-v8a
-        mv app_pojavlauncher/build/outputs/apk/debug/app_pojavlauncher-debug.apk out/app-debug-noruntime.apk
-
+    
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
           name: app-debug-arm64
           path: out/app-debug.apk
-          
-    - name: Upload APK (without runtime)
-      uses: actions/upload-artifact@v4
-      with:
-          name: app-debug-noruntime-arm64
-          path: out/app-debug-noruntime.apk
