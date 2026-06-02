@@ -97,23 +97,13 @@ jobs:
         mv app_pojavlauncher/build/outputs/apk/debug/app_pojavlauncher-debug.apk out/app-debug-noruntime.apk
 
     - name: Upload APK
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
           name: app-debug-arm64
           path: out/app-debug.apk
           
-    - name: Upload onto the Google Play testing track
-      if: github.repository_owner == 'PojavLauncherTeam' && github.ref_name == 'v3_openjdk'
-      uses: r0adkll/upload-google-play@v1.0.15
-      with:
-        serviceAccountJsonPlainText: ${{ secrets.GPLAY_SERVICE_JSON }}
-        packageName: net.kdt.pojavlaunch
-        releaseFiles: out/app-gplay.aab
-        track: internal
-        inAppUpdatePriority: 5
-        
     - name: Upload APK (without runtime)
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
           name: app-debug-noruntime-arm64
           path: out/app-debug-noruntime.apk
