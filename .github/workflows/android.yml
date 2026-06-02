@@ -24,7 +24,7 @@ jobs:
       with:
         java-version: 1.8
 
-    # 下载 gl4es（假设 artifact 中包含 arm64 库，或单独指定 arm64 的 artifact 名称）
+
     - name: Get gl4es
       uses: dawidd6/action-download-artifact@v2
       with:
@@ -34,47 +34,8 @@ jobs:
           workflow_conclusion: success
           repo: cyf112233/gl4es-114-extra
           branch: master
-          name: gl4es-114   # 如果该 artifact 包含所有架构，后续会清理非 arm64 的 so
-
-    # 下载 arm64 版本的 JRE8
-    - name: Get JRE8 (arm64)
-      uses: dawidd6/action-download-artifact@v2.17.0
-      with:
-          github_token: ${{secrets.GITHUB_TOKEN}}
-          workflow: build.yml
-          path: app_pojavlauncher/src/main/assets/components/jre
-          repo: Google61/openjdk-build-android
-          workflow_conclusion: success
-          branch: jre8-api19
-          name: jre8-aarch64   # 改为 arm64 的 artifact
-
-    # 构建 JRE JAR 文件
-    - name: Build JRE JAR files
-      run: |
-        chmod +x scripts/languagelist_updater.sh
-        bash scripts/languagelist_updater.sh
-      
-        cd app_pojavlauncher/src/main/assets/components/jre
-        mv jre8*.tar.xz bin-arm64.tar.xz   # 改名适配 arm64
-        tar -cf universal.tar.xz -T /dev/null
-        date +%Y%m%d > version
-        cd $GITHUB_WORKSPACE
-        
-        mkdir -p out
-        chmod +x gradlew
-        ./gradlew clean
-        # 构建 JRE JAR 文件
-        ./gradlew :jre_lwjgl3glfw:build
-
-    # 构建 Google Play .aab（仅 arm64）
-    - name: Build Google Play .aab (arm64 only)
-      if: github.repository_owner == 'PojavLauncherTeam' && github.ref_name == 'v3_openjdk'
-      run: |
-        # 通过 gradle 属性限制 ABI 为 arm64-v8a
-        ./gradlew :app_pojavlauncher:bundleGplay -Pandroid.abiFilters=arm64-v8a
-        mv app_pojavlauncher/build/outputs/bundle/gplay/app_pojavlauncher-gplay.aab out/app-gplay.aab
-
-    # 构建 Debug .apk（仅 arm64）
+          name: gl4es-114
+          
     - name: Build Debug .apk (arm64 only)
       run: |
         ./gradlew :app_pojavlauncher:assembleDebug -Pandroid.abiFilters=arm64-v8a
